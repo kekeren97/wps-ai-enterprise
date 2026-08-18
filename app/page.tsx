@@ -2,27 +2,6 @@
 
 import { useState } from "react";
 
-const quotaViews = {
-  全企业: [
-    { label: "知识工作", value: 78, amount: "1,248 万点" },
-    { label: "数据分析", value: 62, amount: "992 万点" },
-    { label: "应用与代码", value: 41, amount: "656 万点" },
-    { label: "系统调用", value: 28, amount: "448 万点" },
-  ],
-  按部门: [
-    { label: "市场中心", value: 86, amount: "860 万点" },
-    { label: "销售中心", value: 72, amount: "720 万点" },
-    { label: "产品研发", value: 54, amount: "540 万点" },
-    { label: "职能中心", value: 35, amount: "350 万点" },
-  ],
-  按能力: [
-    { label: "普通任务", value: 82, amount: "1,312 万点" },
-    { label: "应用任务", value: 68, amount: "1,088 万点" },
-    { label: "AI 专家", value: 45, amount: "720 万点" },
-    { label: "系统调用", value: 24, amount: "384 万点" },
-  ],
-};
-
 const scenarios = {
   市场: {
     title: "从一次活动，到一套可复用的内容生产线",
@@ -56,14 +35,63 @@ const scenarios = {
   },
 };
 
-type QuotaView = keyof typeof quotaViews;
 type Scenario = keyof typeof scenarios;
 
+const scenarioPreviews: Record<Scenario, {
+  columns: string[];
+  rows: string[][];
+  metrics: { label: string; value: string }[];
+  insight: string;
+  steps: string[];
+  schedule: string;
+}> = {
+  市场: {
+    columns: ["内容资产", "渠道", "状态"],
+    rows: [["新品核心卖点", "全渠道", "已统一"], ["发布会方案", "线下活动", "可交付"], ["公众号长文", "微信", "待发布"]],
+    metrics: [{ label: "生成内容", value: "18 篇" }, { label: "覆盖渠道", value: "6 个" }],
+    insight: "新品的“团队协同”卖点在渠道文案中反馈最好。",
+    steps: ["汇总素材", "生成内容", "沉淀 Wiki"],
+    schedule: "活动结束后自动复盘",
+  },
+  销售: {
+    columns: ["客户", "风险", "下一步"],
+    rows: [["启明科技", "高", "今日回访"], ["华曜零售", "中", "补充方案"], ["远洲制造", "高", "主管介入"]],
+    metrics: [{ label: "风险客户", value: "12 家" }, { label: "预计影响", value: "¥86 万" }],
+    insight: "三家重点客户连续两周无有效跟进，建议优先介入。",
+    steps: ["同步 CRM", "生成话术", "提醒负责人"],
+    schedule: "每个工作日 09:00",
+  },
+  人力: {
+    columns: ["团队", "负荷", "建议"],
+    rows: [["产品一组", "92%", "调整排期"], ["华东销售", "81%", "补充支持"], ["客户成功", "74%", "持续观察"]],
+    metrics: [{ label: "高负荷团队", value: "3 个" }, { label: "异常波动", value: "+18%" }],
+    insight: "跨部门会议增加是本周团队负荷上升的主要原因。",
+    steps: ["汇总协作数据", "识别异常", "推送建议"],
+    schedule: "每周一 08:30",
+  },
+  研发: {
+    columns: ["交付项", "检查", "结果"],
+    rows: [["查询应用", "用例测试", "通过"], ["接口调用", "权限校验", "通过"], ["上线说明", "内容检查", "已生成"]],
+    metrics: [{ label: "完成任务", value: "24 项" }, { label: "代码问题", value: "3 个" }],
+    insight: "发现三个边界条件问题，已给出修改建议和对应代码。",
+    steps: ["读取 PRD", "构建与检查", "发布应用"],
+    schedule: "合并代码后自动检查",
+  },
+  管理层: {
+    columns: ["经营指标", "本期", "变化"],
+    rows: [["新增收入", "¥328 万", "+12%"], ["续约率", "91.4%", "+2.1%"], ["重点风险", "5 项", "需决策"]],
+    metrics: [{ label: "待决策事项", value: "5 项" }, { label: "整体达成", value: "96%" }],
+    insight: "华东新客增长抵消了续费回落，五项风险需要本周决策。",
+    steps: ["汇总经营数据", "标记风险", "生成晨报"],
+    schedule: "每天 07:30",
+  },
+};
+
 export default function Home() {
-  const [quotaView, setQuotaView] = useState<QuotaView>("全企业");
   const [scenario, setScenario] = useState<Scenario>("市场");
   const [mode, setMode] = useState<"本地" | "云端">("本地");
   const activeScenario = scenarios[scenario];
+  const activePreview = scenarioPreviews[scenario];
 
   return (
     <main>
@@ -75,9 +103,9 @@ export default function Home() {
             <em>企业版</em>
           </a>
           <div className="nav-links">
-            <a href="#credits">AI 额度</a>
             <a href="#capabilities">能力</a>
             <a href="#scenarios">场景</a>
+            <a href="#plans">企业方案</a>
             <a href="#security">安全与管理</a>
           </div>
           <a className="nav-cta" href="#contact">申请企业体验</a>
@@ -85,19 +113,21 @@ export default function Home() {
 
         <div className="hero-grid" id="top">
           <div className="hero-copy">
-            <div className="eyebrow"><span></span> 当前由 WPS Comate 驱动</div>
-            <h1>给每个团队一支<br /><strong>会交付的 AI 队伍</strong></h1>
+            <div className="eyebrow"><span></span> 面向企业的一站式 AI 工作平台</div>
+            <h1>从一句话，<br /><strong>到一套交付成果</strong></h1>
             <p className="hero-lead">
-              一份企业 AI 额度，驱动文档、数据、代码、知识与业务系统协同。让 AI 不只回答问题，更能理解组织、执行任务、交付结果。
+              WPS AI 能写文档、做表格、生成演示、分析数据、开发应用，也能连接企业知识和业务系统，持续执行复杂任务。
             </p>
             <div className="hero-actions">
               <a className="primary-btn" href="#contact">申请企业体验 <span>↗</span></a>
-              <a className="text-btn" href="#credits">了解额度方案 <span>↓</span></a>
+              <a className="text-btn" href="#capabilities">看看能做什么 <span>↓</span></a>
             </div>
-            <div className="trust-row">
-              <span>本地 + 云端双引擎</span>
-              <span>按人 / 部门 / 能力分配</span>
-              <span>企业权限与审计</span>
+            <div className="hero-includes">
+              <small>企业版包含</small>
+              <div className="hero-capability-list">
+                <span>智能文档</span><span>表格分析</span><span>演示生成</span><span>企业问数</span>
+                <span>AI 专家</span><span>技能与应用</span><span>团队协作</span><span>自动化</span>
+              </div>
             </div>
           </div>
 
@@ -128,53 +158,88 @@ export default function Home() {
                   </div>
                 </div>
               </div>
-              <div className="quota-float">
-                <div><span>本月 AI 额度</span><b>61%</b></div>
-                <div className="quota-track"><i></i></div>
-                <small>自动匹配 Flash / Pro 模型</small>
+              <div className="capability-float">
+                <small>一次任务，多种能力协同</small>
+                <div><span>文档</span><i>→</i><span>数据</span><i>→</i><span>演示</span></div>
+                <b>已交付 3 项成果</b>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      <section className="credit-section section-pad" id="credits" data-screen-label="企业 AI 额度">
-        <div className="section-head split-head">
-          <div>
-            <span className="section-kicker">ENTERPRISE AI CREDITS</span>
-            <h2>一份额度，<br />把 AI 按组织方式用起来</h2>
-          </div>
-          <p>额度不是一张简单账单，而是一套可配置、可追踪的企业 AI 运营机制。默认全员可用，也能按企业、部门、成员与能力精细管理。</p>
+      <section className="plans-section section-pad" id="plans" data-screen-label="企业方案">
+        <div className="section-head plan-head">
+          <span className="section-kicker">WPS AI FOR BUSINESS</span>
+          <h2>按企业使用规模，<br />选择合适的方案</h2>
         </div>
 
-        <div className="quota-layout">
-          <div className="quota-dashboard">
-            <div className="dashboard-top">
-              <div><small>企业 AI 额度中心 · 示例</small><strong>3,200<span>万点 / 月</span></strong></div>
-              <span className="status-pill">额度充足</span>
-            </div>
-            <div className="quota-tabs" role="tablist" aria-label="额度视图">
-              {(Object.keys(quotaViews) as QuotaView[]).map((item) => (
-                <button key={item} className={quotaView === item ? "active" : ""} onClick={() => setQuotaView(item)} role="tab" aria-selected={quotaView === item}>{item}</button>
-              ))}
-            </div>
-            <div className="bars" key={quotaView}>
-              {quotaViews[quotaView].map((item, index) => (
-                <div className="bar-row" key={item.label}>
-                  <div><span>{item.label}</span><b>{item.amount}</b></div>
-                  <div className="bar-track"><i style={{ width: `${item.value}%`, animationDelay: `${index * 80}ms` }}></i></div>
-                </div>
-              ))}
-            </div>
-            <div className="dashboard-foot"><span><i></i> 本月已使用 61%</span><span>预计剩余 12 天</span></div>
-          </div>
+        <div className="plan-layout">
+          <article className="plan-card">
+            <div className="plan-top"><span>企业基础方案</span><small>适合小规模试用与核心团队</small></div>
+            <div className="plan-price"><b>¥4,980</b><span>/ 年</span></div>
+            <div className="plan-usage"><small>年度包含 AI 使用量</small><strong>10 万点</strong></div>
+            <ul><li>完整 WPS AI 核心能力</li><li>本地与云端任务执行</li><li>企业权限与使用管理</li><li>支持企业自购模型接入</li></ul>
+            <a href="#contact">咨询企业方案 <span>→</span></a>
+          </article>
 
-          <div className="quota-features">
-            <article><span>01</span><div><h3>默认全员可用</h3><p>企业拥有额度后即可开箱使用，管理员可随时调整全局规则。</p></div></article>
-            <article><span>02</span><div><h3>多维精细限额</h3><p>按日或按月，对企业、部门、成员、普通任务、应用任务与专家分别配置。</p></div></article>
-            <article><span>03</span><div><h3>模型等级偏好</h3><p>设置自动模式、Flash / Pro 可用范围与默认通道，在体验和成本之间动态平衡。</p></div></article>
-            <article><span>04</span><div><h3>统一模型管理</h3><p>既可使用 WPS AI 额度，也支持企业自购模型上架，统一授权与可见范围。</p></div></article>
-          </div>
+          <article className="plan-card featured">
+            <div className="plan-badge">更适合规模化使用</div>
+            <div className="plan-top"><span>企业进阶方案</span><small>适合多部门与高频业务场景</small></div>
+            <div className="plan-price"><b>¥46,800</b><span>/ 年</span></div>
+            <div className="plan-usage"><small>年度包含 AI 使用量</small><strong>100 万点</strong></div>
+            <ul><li>完整 WPS AI 核心能力</li><li>本地与云端任务执行</li><li>企业权限与使用管理</li><li>支持企业自购模型接入</li></ul>
+            <a href="#contact">咨询企业方案 <span>→</span></a>
+          </article>
+
+        </div>
+
+        <p className="plan-footnote">价格为企业年度方案参考价；AI 点数仅用于衡量模型与任务使用量，不影响能力范围。实际采购与服务范围以合同为准。</p>
+      </section>
+
+      <section className="included-section section-pad" data-screen-label="WPS AI 能力全景">
+        <div className="section-head overview-head">
+          <span className="section-kicker">EVERYTHING YOUR TEAM NEEDS</span>
+          <h2>从创作到执行，<br />都在同一个 WPS AI</h2>
+          <div className="overview-legend"><span>办公创作</span><span>数据与知识</span><span>应用与专家</span><span>团队与自动化</span></div>
+        </div>
+
+        <div className="capability-showcase">
+          <article className="showcase-card creation-suite">
+            <div className="showcase-copy"><span>办公创作</span><h3>一份材料，变成三种可交付成果</h3><p>写文档、做表格、生成演示，内容在 WPS 办公组件之间自然流动。</p></div>
+            <div className="creation-canvas">
+              <div className="doc-sheet"><small>市场分析报告</small><b></b><b></b><b></b><span>W</span></div>
+              <div className="sheet-grid"><i></i><i></i><i></i><i></i><i></i><i></i><span>X</span></div>
+              <div className="slide-sheet"><strong>Q3</strong><small>经营复盘</small><span>P</span></div>
+              <div className="creation-link"><i></i><i></i><i></i></div>
+            </div>
+          </article>
+
+          <article className="showcase-card intelligence-suite">
+            <div className="showcase-copy"><span>数据与知识</span><h3>企业数据，开口就能问</h3><p>连接数据、建立业务语义，让会议、文档和系统数据成为可靠答案。</p></div>
+            <div className="insight-canvas">
+              <div className="insight-question">“本季度增长来自哪里？”</div>
+              <div className="insight-bars"><i></i><i></i><i></i><i></i><i></i></div>
+              <div className="insight-answer"><span>主要增长驱动</span><b>华东区域 · 新客</b></div>
+            </div>
+          </article>
+
+          <article className="showcase-card expert-suite">
+            <div className="showcase-copy"><span>应用与专家</span><h3>把经验做成会工作的 AI</h3><p>创建企业专家、技能和应用，让 AI 按业务方法自主执行复杂任务。</p></div>
+            <div className="agent-canvas">
+              <div className="agent-core"><small>企业专家</small><b>AI</b></div>
+              <span>岗位 SOP</span><span>团队技能</span><span>业务数据</span><span>应用工具</span>
+            </div>
+          </article>
+
+          <article className="showcase-card collaboration-suite">
+            <div className="showcase-copy"><span>团队与自动化</span><h3>人和 Agent，在同一个任务里协作</h3><p>共享任务上下文与成果资产，连接业务系统，并按时间或事件持续运行。</p></div>
+            <div className="collaboration-canvas">
+              <div className="collab-people"><span>产品</span><span>运营</span><span>销售</span><span>AI</span></div>
+              <div className="workflow-track"><i></i><b>汇总进展</b><i></i><b>生成周报</b><i></i><b>自动发送</b></div>
+              <div className="workflow-status"><span><i></i> 每周五 18:00</span><b>运行中</b></div>
+            </div>
+          </article>
         </div>
       </section>
 
@@ -279,9 +344,31 @@ export default function Home() {
           </div>
           <div className="scenario-output">
             <div className="output-head"><span><i></i> 任务已完成</span><small>共执行 12 步 · 3 分 18 秒</small></div>
-            <div className="output-summary"><small>交付摘要</small><p>已完成资料汇总、内容生成与团队资产沉淀，以下文件可直接使用。</p></div>
-            <div className="output-files">
-              {activeScenario.outputs.map((item, index) => <div key={item}><span>{["W", "X", "A"][index]}</span><b>{item}</b><small>打开 ↗</small></div>)}
+            <div className="result-workspace">
+              <article className="artifact-preview table-artifact">
+                <header><span>X</span><div><small>表格成果</small><b>{activeScenario.outputs[0]}</b></div><i>↗</i></header>
+                <div className="artifact-table">
+                  <div className="artifact-row artifact-columns">{activePreview.columns.map((item) => <span key={item}>{item}</span>)}</div>
+                  {activePreview.rows.map((row, rowIndex) => <div className="artifact-row" key={row.join("-")}>
+                    {row.map((item, itemIndex) => <span className={itemIndex === 1 && rowIndex !== 2 ? "emphasis" : ""} key={item}>{item}</span>)}
+                  </div>)}
+                </div>
+                <footer><span>AI 已整理并标记重点</span><b>查看完整表格 →</b></footer>
+              </article>
+
+              <div className="artifact-side">
+                <article className="artifact-preview brief-artifact">
+                  <header><span>W</span><div><small>管理摘要</small><b>{activeScenario.outputs[1]}</b></div><i>↗</i></header>
+                  <div className="metric-preview">{activePreview.metrics.map((item) => <div key={item.label}><small>{item.label}</small><b>{item.value}</b></div>)}</div>
+                  <p><i></i>{activePreview.insight}</p>
+                </article>
+
+                <article className="artifact-preview automation-artifact">
+                  <header><span>A</span><div><small>自动化任务</small><b>{activeScenario.outputs[2]}</b></div><i>↗</i></header>
+                  <div className="automation-track">{activePreview.steps.map((item) => <span key={item}><i></i><b>{item}</b></span>)}</div>
+                  <footer><small>{activePreview.schedule}</small><b><i></i> 已启用</b></footer>
+                </article>
+              </div>
             </div>
           </div>
         </div>
@@ -309,8 +396,8 @@ export default function Home() {
         <div className="cta-inner">
           <span className="section-kicker">WPS AI FOR BUSINESS</span>
           <h2>让 AI 成为组织的<br />下一种工作方式</h2>
-          <p>获取企业 AI 额度，体验由 WPS Comate 驱动的任务执行、团队协作与安全治理。</p>
-          <div className="cta-actions"><a className="primary-btn light" href="#top">申请企业体验 <span>↗</span></a><a className="cta-secondary" href="#credits">查看额度能力</a></div>
+          <p>用一个入口完成文档、数据、应用、知识与业务执行，让每个团队都拥有会交付的 AI 工作伙伴。</p>
+          <div className="cta-actions"><a className="primary-btn light" href="#top">申请企业体验 <span>↗</span></a><a className="cta-secondary" href="#plans">查看企业方案</a></div>
         </div>
       </section>
 
