@@ -1,0 +1,18 @@
+{
+  "type": "design",
+  "designSystems": [],
+  "primaryDesignSystem": null,
+  "assets": {
+    "WPS AI 企业版官网": {
+      "versions": [
+        {
+          "path": "app/page.tsx",
+          "createdAt": "2026-08-18T01:52:46.986Z",
+          "status": "needs-review"
+        }
+      ]
+    }
+  },
+  "createdAt": "2026-08-18T01:52:46.986Z",
+  "updatedAt": "2026-08-18T01:53:17.314Z"
+}
